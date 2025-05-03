@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bs-font-sans-serif: 'Figtree', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+  }
+  
+  body {
+    font-family: var(--bs-font-sans-serif);
+  }
+  
+  /* Override Bootstrap headings if needed */
+  h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--bs-font-sans-serif);
+  }
+}
+
+/* Custom styles that won't interfere with Bootstrap */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #111827; /* Tailwind gray-900 */
+  color: #F9FAFB; /* Tailwind gray-50 */
+}
+
+/* Dark mode overrides for Bootstrap components */
+html.dark .card,
+html.dark .modal-content,
+html.dark .list-group-item,
+html.dark .navbar {
+  background-color: #1F2937; /* Tailwind gray-800 */
+  color: #F9FAFB; /* Tailwind gray-50 */
+  border-color: #374151; /* Tailwind gray-700 */
+}
+
+html.dark .btn-light {
+  background-color: #374151; /* Tailwind gray-700 */
+  border-color: #4B5563; /* Tailwind gray-600 */
+  color: #F9FAFB; /* Tailwind gray-50 */
+}
+
+html.dark .form-control,
+html.dark .form-select {
+  background-color: #1F2937; /* Tailwind gray-800 */
+  border-color: #4B5563; /* Tailwind gray-600 */
+  color: #F9FAFB; /* Tailwind gray-50 */
+}
+
+html.dark .card,
+html.dark [class*="bg-white"] {
+  background-color: #1F2937 !important; /* gray-800 */
+  border-color: #374151 !important; /* gray-700 */
+}
+
+/* Transition for smooth theme changes */
+body,
+.card,
+.modal-content,
+.list-group-item,
+.navbar,
+.btn,
+.form-control,
+.form-select {
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

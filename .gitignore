@@ -1,0 +1,11 @@
+backend/__pycache__/
+backend/.env
+frontend/node_modules/
+backend/config.py
+backend/notebook.ipynb
+backend/examples.py
+data/
+.venv/
+llm.ipynb
+main.py
+backend2.py
