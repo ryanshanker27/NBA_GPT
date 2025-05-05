@@ -70,7 +70,7 @@ export function InfoCard({ isOpen, onClose }: InfoCardProps) {
                 }}
                 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100"
               >
-                About NBA Stats Chatbot
+                About Hoop-GPT
               </h2>
               <Button
                 onClick={onClose}
@@ -103,9 +103,9 @@ export function InfoCard({ isOpen, onClose }: InfoCardProps) {
               }}
             >
               <p style={{ fontFamily: "Figtree" }}>
-                NBA Stats Chatbot is an interactive tool that allows you to
-                query NBA statistics through natural language. Ask questions
-                about players, teams, standings, historical records, and more.
+                Hoop-GPT is an interactive tool that allows you to query NBA
+                statistics through natural language. Ask questions about
+                players, teams, standings, historical records, and more.
               </p>
 
               <h3

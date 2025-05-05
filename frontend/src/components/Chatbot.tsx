@@ -154,11 +154,11 @@ export default function Chatbot() {
                     style={{ fontFamily: "Figtree" }}
                     className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-200"
                   >
-                    Welcome to the NBA Stats Chatbot
+                    Welcome to Hoop-GPT!
                   </h3>
                   <p className="text-gray-500 dark:text-gray-400">
-                    Ask questions about NBA players, teams, standings, records,
-                    and more!
+                    Ask questions about NBA players, teams, stats, records, and
+                    more!
                   </p>
                 </div>
               </div>
@@ -173,19 +173,18 @@ export default function Chatbot() {
                   }`}
                 >
                   <div
-                    // 80% width, rounded corners based on message type
-                    className={`max-w-[80%] px-4 py-3 
-                      ${
-                        // CHANGE: Updated to rounded-full for user messages
-                        message.type === "query"
-                          ? "bg-primary text-white rounded-full"
-                          : message.error
-                          ? "bg-red-50 dark:bg-red-900/20 text-gray-800 dark:text-gray-200 rounded-3xl border border-red-200 dark:border-red-800"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-3xl"
-                      }`}
+                    // Updated styling for message bubbles
+                    className={`max-w-[80%] ${
+                      // CHANGE: Updated styles for user messages to center text vertically
+                      message.type === "query"
+                        ? "bg-primary text-white rounded-full flex items-center justify-center py-2 px-4"
+                        : message.error
+                        ? "bg-red-50 dark:bg-red-900/20 text-gray-800 dark:text-gray-200 rounded-3xl border border-red-200 dark:border-red-800 px-4 py-3"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-3xl px-4 py-3"
+                    }`}
                   >
                     {/* Display message content with animation for responses */}
-                    <p className="whitespace-pre-wrap">
+                    <p className="whitespace-pre-wrap my-1">
                       {message.type === "response" &&
                       index === animatingMessageIndex
                         ? displayedContent

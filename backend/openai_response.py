@@ -548,8 +548,10 @@ ORDER BY "Net Rating" DESC;
 
 QUERY_BREAKDOWN_TEMPLATE = """
 Please break down this NBA query into bullets of:
-- Query type (one of either Player Performance, Team Performance, Player Averages, Player Information, or Team Averages)
+- Query type (one of either Single Game Player Performance, Single Game Team Performance, Multi-Game Player Performance, Multi-Game Team Performance, or Player Information)
     - Put double dollar signs around the query type.
+    - Averages or aggregate statistics over a period of time are always multi-game queries.
+    - Questions that return performances from specific games are always single game queries.
 - Key entities (players, teams, dates, stats, etc.)
     - If the query is asking about a player, include the player's full name with triple asterisks around the name.
 - Filters/conditions (e.g. "pts ≥ 30", seasons, age at game date)
@@ -587,7 +589,7 @@ Generate a PostgreSQL statement that:
    - Season numbers should be adjusted (22020 = 2020-21, 22021 = 2021-22, etc.), subtract by 20000
      - The current season is 2024-25 (season_id = 22024)
    - Age = age at game date  
-   - Limit ≤ 30 rows (or top 10 for "most/best/highest/least/worst/lowest" queries)  
+   - Limit ≤ 30 rows (or top 10 for "most/best/highest/least/worst/lowest/leading" queries)  
    - If no schema data supports the query, ask for clarification  
    - Return all required fields, aliased as full, UPPER-CASE abbreviations except for player or team names, game dates, and ratings.  
      - e.g. PTS for points, PPG for points per game, AST for assists, APG for assists per game, FG3% for three point percentage, USG% for usage percentage, etc.
@@ -686,18 +688,18 @@ def get_sql_query(query, querybreakdown):
     match = re.search(r"\$\$(.*?)\$\$", querybreakdown)
     querytype = match.group(1).lower() if match else None
 
-    if querytype == "player performance":
+    if querytype == "single game player performance":
         examples = PLAYER_PERFORMANCE_EXAMPLES
-    elif querytype == "team performance":
+    elif querytype == "single game team performance":
         examples = TEAM_PERFORMANCE_EXAMPLES
-    elif querytype == "player averages":
+    elif querytype == "multi-game player performance":
         examples = PLAYER_AVERAGE_EXAMPLES
+    elif querytype == "multi-game team performance":
+        examples = TEAM_AVERAGES_EXAMPLES
     elif querytype == "player information":
         examples = PLAYER_INFORMATION_EXAMPLES
-    elif querytype == "team averages":
-        examples = TEAM_AVERAGES_EXAMPLES
     else:
-        examples = PLAYER_PERFORMANCE_EXAMPLES
+        examples = PLAYER_AVERAGE_EXAMPLES
 
     messages = [
         {"role": "system", "content": f"You are a SQL query generator for NBA statistics. {SQL_PROMPT_TEMPLATE.format(bdq = querybreakdown, schema = schema, examples = examples)}"},

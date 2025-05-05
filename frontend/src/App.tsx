@@ -53,7 +53,7 @@ export default function App() {
           style={{ fontFamily: "Figtree" }}
           className="text-4xl font-bold text-primary dark:text-primary-light transition-colors text-center"
         >
-          NBA Stats Chatbot
+          Hoop-GPT
         </h1>
 
         <div className="flex items-center space-x-4">
@@ -80,8 +80,8 @@ export default function App() {
         style={{ fontFamily: "Figtree" }}
         className="w-full py-4 text-center text-sm text-gray-500 dark:text-gray-400"
       >
-        © {new Date().getFullYear()} NBA Stats Chatbot - All NBA logos and data
-        are property of the NBA and its teams
+        © {new Date().getFullYear()} Hoop-GPT - All NBA logos and data are
+        property of the NBA and its teams
       </footer>
 
       <InfoCard
