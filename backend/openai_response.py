@@ -45,8 +45,8 @@ games (contains info on every individual game in the database):
 
 game_stats_player (contains info on all player statistics from a given game):
 - game_id (INT, FK -> games.game_id)
-- player_id (INT, FK -> players.player_id)
-- team_id (INT, FK -> teams.team_id)
+- player_id (INT, FK -> players.player_id) - id of the player who played in the given game
+- team_id (INT, FK -> teams.team_id) - team the player played for in the given game
 - player_name (VARCHAR -> players.player_name)
 - entered_game (INT) - 1 if player entered given game, 0 if not
 - min (INT) - minutes
@@ -554,6 +554,7 @@ Please break down this NBA query into bullets of:
     - Questions that return performances from specific games are always single game queries.
 - Key entities (players, teams, dates, stats, etc.)
     - If the query is asking about a player, include the player's full name with triple asterisks around the name.
+    - Return the full team name in the breakdown (e.g. "Boston Celtics").
 - Filters/conditions (e.g. "pts ≥ 30", seasons, age at game date)
 - Output variables (e.g. game_date, home_team, away_team, pts, reb, ast, …)
     - Include game date and both team names any row that corresponds to a specific game.
@@ -576,24 +577,36 @@ Given:
 
 Generate a PostgreSQL statement that:
 
-1. Joins the right tables (games, game_stats_*, teams, players).  
-2. Applies filters from bdq.  
-3. Returns all required fields:
+1. Joins the right tables (games, game_stats_*, teams, players) and applies the filters from the breakdown. 
+2. Returns all required fields:
    - Always: game_date, home_team/full_name, away_team/full_name  
    - For player performance queries: ALWAYS include min, pts, reb, ast, stl, blk even if not explicitly requested 
    - For player averages: ALWAYS include ppg, rpg, apg even if not explicitly requested
    - For rows that correspond to a specific game: ALWAYS include game_date, home_team/full_name, away_team/full_name
    - All extra variables used in calculations or filtering are required to be returned
-4. Honors rules:
+3. Honors rules:
+   - Use full team names in queries.
    - Cast divisions, percentages or averages to FLOAT; multiply all percentages by 100.0
    - Season numbers should be adjusted (22020 = 2020-21, 22021 = 2021-22, etc.), subtract by 20000
      - The current season is 2024-25 (season_id = 22024)
    - Age = age at game date  
-   - Limit ≤ 30 rows (or top 10 for "most/best/highest/least/worst/lowest/leading" queries)  
-   - If no schema data supports the query, ask for clarification  
+   - Limit ≤ 30 rows (or limit ≤ 10 rows for queries that contain "most/best/highest/least/worst/lowest/leading")  
+   - For queries discussing statistics against a specific team, ensure that theteam is not included in the query
+   - For player-performance queries against a specific team, do not include any players from the team in the results.
    - Return all required fields, aliased as full, UPPER-CASE abbreviations except for player or team names, game dates, and ratings.  
      - e.g. PTS for points, PPG for points per game, AST for assists, APG for assists per game, FG3% for three point percentage, USG% for usage percentage, etc.
      - All column aliases should be in quotations and unabbreviated column aliases should be properly spaced and capitalized.
+ 4. Opponent-Specific Filtering
+   - When asked for Team A's performance against Team B:
+     1. Filter to rows where
+        (home_team = Team A AND away_team = Team B)
+        OR
+        (away_team = Team A AND home_team = Team B).
+     2. Extract Team A's points:
+        - If home_team = Team A, use home_score as subject_score and away_score as opponent_score.
+        - Otherwise, use away_score as subject_score and home_score as opponent_score.
+     3. Decide win/loss by comparing subject_score and opponent_score.
+     4. Exclude Team B's performance metrics from the returned fields—only Team A's stats appear.
 
 Only output the SQL. No extra text.
 
@@ -707,11 +720,11 @@ def get_sql_query(query, querybreakdown):
     ]
 
     response = call_openai_with_retry(
-        model="gpt-4o-mini",
+        model="gpt-4.1-mini",
         messages = messages,
         max_tokens=1000,
         temperature=0.0,
-        top_p=1.0
+        top_p=0.7
     )
 
     sqlquery = response.choices[0].message.content.strip()
