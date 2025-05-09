@@ -233,7 +233,7 @@ JOIN games g ON gst.game_id = g.game_id
 JOIN teams t1 ON g.home_team = t1.team_id
 JOIN teams t2 ON g.away_team = t2.team_id
 WHERE gst.team_id = (SELECT team_id FROM teams WHERE full_name = 'Denver Nuggets') 
-AND g.season_id IN (22023, 22024) 
+AND EXTRACT(YEAR FROM g.game_date) IN (2023, 2024)
 AND g.season_type = 'Playoffs'
 GROUP BY g.game_date, t1.full_name, t2.full_name, g.season_id
 ORDER BY g.game_date;
@@ -577,37 +577,29 @@ Given:
 
 Generate a PostgreSQL statement that:
 
-1. Joins the right tables (games, game_stats_*, teams, players) and applies the filters from the breakdown. 
-2. Returns all required fields:
-   - Always: game_date, home_team/full_name, away_team/full_name  
-   - For player performance queries: ALWAYS include min, pts, reb, ast, stl, blk even if not explicitly requested 
-   - For player averages: ALWAYS include ppg, rpg, apg even if not explicitly requested
-   - For rows that correspond to a specific game: ALWAYS include game_date, home_team/full_name, away_team/full_name
-   - All extra variables used in calculations or filtering are required to be returned
-3. Honors rules:
-   - Use full team names in queries.
-   - Cast divisions, percentages or averages to FLOAT; multiply all percentages by 100.0
-   - Season numbers should be adjusted (22020 = 2020-21, 22021 = 2021-22, etc.), subtract by 20000
-     - The current season is 2024-25 (season_id = 22024)
-   - Age = age at game date  
-   - Limit ≤ 30 rows (or limit ≤ 10 rows for queries that contain "most/best/highest/least/worst/lowest/leading")  
-   - For player-performance queries against a specific team, do not include any players from the team in the results.
-   - Return all required fields, aliased as full, UPPER-CASE abbreviations except for player or team names, game dates, and ratings.  
-     - e.g. PTS for points, PPG for points per game, AST for assists, APG for assists per game, FG3% for three point percentage, USG% for usage percentage, etc.
-     - All column aliases should be in quotations and unabbreviated column aliases should be properly spaced and capitalized.
- 4. Opponent-Specific Filtering
-   - When asked for Team A's performance against Team B:
-     1. Filter to rows where
-        (home_team = Team A AND away_team = Team B)
-        OR
-        (away_team = Team A AND home_team = Team B).
-     2. Extract Team A's points:
-        - If home_team = Team A, use home_score as subject_score and away_score as opponent_score.
-        - Otherwise, use away_score as subject_score and home_score as opponent_score.
-     3. Decide win/loss by comparing subject_score and opponent_score.
-     4. Exclude Team B's performance metrics from the returned fields; only Team A's stats appear.
-   - For player performances against specific teams, do not include any players from those teams in the results.
-   - For averages against multiple team opponents, group by the opponent team.
+Join tables: games, game_stats_*, teams, players; apply breakdown filters.
+
+Required fields:
+- Game rows: game_date, home_team.full_name AS "HOME_TEAM", away_team.full_name AS "AWAY_TEAM", home_score AS "HOME_SCORE", away_score AS "AWAY_SCORE".
+- Player performance: MIN AS "MIN", PTS AS "PTS", REB AS "REB", AST AS "AST", STL AS "STL", BLK AS "BLK".
+- Player averages: PPG AS "PPG", RPG AS "RPG", APG AS "APG".
+- Include any extra fields used for filtering or calculations.
+
+Global rules:
+1. Use full team names.
+2. Cast divisions/percentages/averages to FLOAT; multiply percentages by 100.
+3. Season = season_id - 20000 (e.g. 22024 → 2024-25); assume calendar year if only year given.
+4. AGE calculated at game_date.
+5. LIMIT ≤ 30 rows (≤ 10 if superlative: most/best/highest/least/lowest/leading).
+6. Alias non-name/date/rating columns as UPPER-CASE abbreviations in quotes (e.g. "PTS", "FG3%", "USG%"); leave names/dates/ratings unaliased.
+
+Opponent-specific filtering:
+- For Team A vs Team B:  
+  WHERE (home_team=Team A AND away_team=Team B) OR (away_team=Team A AND home_team=Team B).  
+  Define subject_score = home_score if Team A is home (else away_score), opponent_score likewise; derive W/L by comparison.
+- Exclude Team B's team/player stats; only return Team A's.
+- For player-vs-team queries, omit players from that team.
+- For averages vs multiple opponents, GROUP BY opponent.
 
 Only output the SQL. No extra text.
 
@@ -729,6 +721,11 @@ def get_sql_query(query, querybreakdown):
     )
 
     sqlquery = response.choices[0].message.content.strip()
+    if sqlquery.lstrip().startswith("```sql"):
+        # Remove the ```sql marker
+        sqlquery = re.sub(r"^```sql\s*\n?", "", sqlquery, flags=re.IGNORECASE)
+        # Remove a trailing ``` if present
+        sqlquery = re.sub(r"\n?```$", "", sqlquery)
     print("SQL Query:", sqlquery)
     # Check for unsupported responses
     if "I cannot answer" in sqlquery or "cannot be answered" in sqlquery or not sqlquery.strip().lower().startswith("select"):
