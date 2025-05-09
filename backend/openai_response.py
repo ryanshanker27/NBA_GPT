@@ -591,7 +591,6 @@ Generate a PostgreSQL statement that:
      - The current season is 2024-25 (season_id = 22024)
    - Age = age at game date  
    - Limit ≤ 30 rows (or limit ≤ 10 rows for queries that contain "most/best/highest/least/worst/lowest/leading")  
-   - For queries discussing statistics against a specific team, ensure that theteam is not included in the query
    - For player-performance queries against a specific team, do not include any players from the team in the results.
    - Return all required fields, aliased as full, UPPER-CASE abbreviations except for player or team names, game dates, and ratings.  
      - e.g. PTS for points, PPG for points per game, AST for assists, APG for assists per game, FG3% for three point percentage, USG% for usage percentage, etc.
@@ -606,7 +605,9 @@ Generate a PostgreSQL statement that:
         - If home_team = Team A, use home_score as subject_score and away_score as opponent_score.
         - Otherwise, use away_score as subject_score and home_score as opponent_score.
      3. Decide win/loss by comparing subject_score and opponent_score.
-     4. Exclude Team B's performance metrics from the returned fields—only Team A's stats appear.
+     4. Exclude Team B's performance metrics from the returned fields; only Team A's stats appear.
+   - For player performances against specific teams, do not include any players from those teams in the results.
+   - For averages against multiple team opponents, group by the opponent team.
 
 Only output the SQL. No extra text.
 

@@ -179,7 +179,7 @@ export default function Chatbot() {
                       message.type === "query"
                         ? "bg-primary text-white rounded-full flex items-center justify-center py-2 px-4"
                         : message.error
-                        ? "bg-red-50 dark:bg-red-900/20 text-gray-800 dark:text-gray-200 rounded-3xl border border-red-200 dark:border-red-800 px-4 py-3"
+                        ? "bg-red-50 dark:bg-red-900/20 text-gray-800 dark:text-gray-200 rounded-3xl px-4 py-3"
                         : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-3xl px-4 py-3"
                     }`}
                   >
