@@ -127,8 +127,11 @@ export function InfoCard({ isOpen, onClose }: InfoCardProps) {
                 Example Questions
               </h3>
               <ul className="list-disc pl-5 space-y-1">
-                <li>Who led the NBA in points per game last season?</li>
-                <li>What's the all-time win-loss record for the Lakers?</li>
+                <li>Who led the NBA in points per game in 2024-25?</li>
+                <li>
+                  Get the results of the last 10 games between the Celtics and
+                  Heat.
+                </li>
                 <li>Compare the stats of LeBron James and Michael Jordan</li>
                 <li>Which team had the best offensive rating in 2023?</li>
               </ul>

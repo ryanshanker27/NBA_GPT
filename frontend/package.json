@@ -39,7 +39,6 @@
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.0"
   },
-  "resolutions": {
-    "rollup": "npm:@rollup/wasm-node"
-  }
+ "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.40.2"}
 }

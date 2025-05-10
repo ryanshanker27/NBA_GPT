@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/config.ts","./src/env.d.ts","./src/index.tsx","./src/components/chatbot.tsx","./src/components/ui/button.tsx","./src/components/ui/card.tsx","./src/components/ui/infocard.tsx","./src/components/ui/input.tsx","./src/components/ui/toggle.tsx"],"version":"5.7.3"}
