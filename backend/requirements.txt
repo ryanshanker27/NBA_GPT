@@ -5,3 +5,9 @@ openai
 supabase
 python-dotenv
 gunicorn
+rapidfuzz
+uuid
+json
+nba_api
+pandas
+numpy

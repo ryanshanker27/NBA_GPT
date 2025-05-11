@@ -115,9 +115,10 @@ export function InfoCard({ isOpen, onClose }: InfoCardProps) {
                 How to Use
               </h3>
               <p style={{ fontFamily: "Figtree" }}>
-                Simply type your question in the chat box and press send. The
-                chatbot will analyze your query and return relevant NBA
-                statistics, often with formatted tables for better readability.
+                Simply type your question in the chat box and press the send
+                button. The chatbot will analyze your query and return relevant
+                NBA statistics, often with formatted tables for better
+                readability.
               </p>
 
               <h3
@@ -132,14 +133,17 @@ export function InfoCard({ isOpen, onClose }: InfoCardProps) {
                   Get the results of the last 10 games between the Celtics and
                   Heat.
                 </li>
-                <li>Compare the stats of LeBron James and Michael Jordan</li>
-                <li>Which team had the best offensive rating in 2023?</li>
+                <li>
+                  How many points did Jayson Tatum average in the last 5 games?
+                </li>
+                <li>Which team had the best defensive rating in 2023?</li>
               </ul>
 
               <p className="text-md text-gray-500 dark:text-gray-400 mt-6">
                 This project uses NBA data to provide insights and statistics.
                 All NBA logos, player information, and related data are property
-                of the NBA and its teams.
+                of the NBA and its teams. This project only uses data after the
+                2020-21 season.
               </p>
             </div>
           </CardContent>

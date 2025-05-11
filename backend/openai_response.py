@@ -6,6 +6,7 @@ from decimal import Decimal
 from user_session import UserSession
 import re
 import time as tm
+import os
 
 schema = """
 teams (contains info on every NBA team):
@@ -642,7 +643,7 @@ def get_openai_client():
     """Get or create an OpenAI client instance"""
     global _openai_client
     if _openai_client is None:
-        _openai_client = OpenAI(api_key=Config.OPENAI_API_KEY)
+        _openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
     return _openai_client
 
 def call_openai_with_retry(model, messages, max_tokens = 1000, temperature = 0.1, top_p = 0.95, retries=3, backoff=2):
