@@ -1,4 +1,4 @@
-# Hoop-GPT
+# [Hoop-GPT](https://nba-1uiai3qdz-ryan-shankers-projects.vercel.app/)
 A conversational AI chatbot that utilizes the OpenAI API to deliver real-time NBA player and team performance insights by dynamically generating SQL queries against a self‑built PostgreSQL database.
 
 ## Key Features
@@ -36,7 +36,7 @@ A conversational AI chatbot that utilizes the OpenAI API to deliver real-time NB
 |                  | GitHub Actions          | Automated database updates                                 |
 
 ## Usage
-Navigate to the live demo: https://nba-chatbot.vercel.app. 
+Navigate to the live demo: (https://nba-1uiai3qdz-ryan-shankers-projects.vercel.app/) 
 
 Type natural‑language questions such as:
 - “What was LeBron James’s PPG in the 2024 playoffs?”
@@ -51,3 +51,5 @@ Toggle between light/dark mode using the switch in the top‑right corner.
 - User Authentication: Allow personalized query history and saved favorites.
 - Caching Layer: Introduce Redis for hot‑path query caching to reduce latency and API costs.
 
+## Suggestions
+If anyone has any suggestions on how this site/engine can be improved, feel free to reach out at ryanjshanker@gmail.com.
