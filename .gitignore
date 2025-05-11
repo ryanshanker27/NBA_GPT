@@ -10,5 +10,3 @@ llm.ipynb
 main.py
 backend2.py
 .env
-.env.development
-.env.production
