@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import api from "@/lib/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Input } from "./ui/input";
@@ -69,7 +70,7 @@ export default function Chatbot() {
 
     try {
       // send query to backend
-      const res = await axios.post("/api/query", { query });
+      const res = await api.post("/query", { query });
 
       if (res.data.success) {
         // if successful, create new messages array with the response
