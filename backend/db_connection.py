@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2 import pool
 # from config import Config
 from typing import Dict, List, Tuple, Any, Optional
+import os
 import threading
 
 # Global connection pool
@@ -17,10 +18,10 @@ def initialize_connection_pool(min_conn=2, max_conn=10):
             connection_pool = psycopg2.pool.ThreadedConnectionPool(
                 minconn=min_conn,
                 maxconn=max_conn,
-                host=Config.DATABASE_HOST,
+                host=os.getenv('DATABASE_HOST'),
                 port=5432,
                 user='postgres',
-                password=Config.DATABASE_PASSWORD,
+                password=os.getenv('DATABASE_PASSWORD'),
                 database='postgres',
                 sslmode='require'
             )
