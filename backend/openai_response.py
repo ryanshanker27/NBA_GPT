@@ -1,5 +1,5 @@
 from openai import OpenAI
-from config import Config
+# from config import Config
 import psycopg2
 from typing import Dict, List, Tuple, Any, Optional
 from decimal import Decimal
