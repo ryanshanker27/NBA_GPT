@@ -15,7 +15,7 @@ A conversational AI chatbot that utilizes the OpenAI API to deliver real-time NB
   3. Uses tailored few‑shot examples and rule‑based templates to generate accurate SQL.
  
 - **Self‑Maintained NBA Database**  
-  1. Daily automated upsert of game results, and team and player stats.  
+  1. Daily automated upsert of game results, and team and player stats (all data taken from the NBA-API library in Python).  
   2. Custom relational schema optimized with indexing and key relationships for fast lookup, filtering, and aggregation.
  
 ## Tech Stack
