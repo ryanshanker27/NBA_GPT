@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-from config import Config
+# from config import Config
 import datetime
 import argparse
 from helpers import update_data  
