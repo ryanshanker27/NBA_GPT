@@ -19,8 +19,8 @@ def initialize_connection_pool(min_conn=2, max_conn=10):
                 minconn=min_conn,
                 maxconn=max_conn,
                 host=os.getenv('DATABASE_HOST'),
-                port=5432,
-                user='postgres',
+                port=6543,
+                user='postgres.ekmdbikjwlbqyoqjhkks',
                 password=os.getenv('DATABASE_PASSWORD'),
                 database='postgres',
                 sslmode='require'

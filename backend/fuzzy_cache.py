@@ -13,6 +13,7 @@ class FuzzyCache:
         self.start_background_refresh()
 
     def fetch_player_names(self):
+        conn = None
         try:
             conn = get_connection()
             cursor = conn.cursor()
