@@ -14,7 +14,7 @@ fuzzy_cache = FuzzyCache()
 # create a Blueprint for the app
 bp = Blueprint('api', __name__)
 # wrap in CORS to allow cross-origin requests
-CORS(bp, resources={r"/api/*": {"origins": "https://nba-i37hw393k-ryan-shankers-projects.vercel.app"}})
+CORS(bp, resources={r"/api/*": {"origins": "*"}})
 
 active_sessions = {}
 
