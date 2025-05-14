@@ -1,14 +1,10 @@
 import pandas as pd
 import numpy as np
-import nba_api
-from nba_api.stats.endpoints import playergamelog, teamgamelog, teamdetails, boxscoreadvancedv2, boxscoreadvancedv3, boxscoretraditionalv2
-from nba_api.stats.static import players, teams
-from nba_api.stats.endpoints import commonteamroster, commonplayoffseries, commonallplayers, playerprofilev2, scoreboardv2, leaguedashplayerstats, leaguedashteamstats, commonplayerinfo
+from nba_api.stats.endpoints import teamgamelog, boxscoreadvancedv2, boxscoretraditionalv2
+from nba_api.stats.endpoints import commonteamroster, scoreboardv2, commonplayerinfo
 import time
-import json
-import random
 import datetime
-import os, glob
+import os
 from supabase import create_client, Client
 import warnings
 warnings.filterwarnings('ignore')
