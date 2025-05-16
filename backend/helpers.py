@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from nba_api.stats.endpoints import teamgamelog, boxscoreadvancedv2, boxscoretraditionalv2
 from nba_api.stats.endpoints import commonteamroster, scoreboardv2, commonplayerinfo
+import nba_api.stats.library.http as http
 import time
 import datetime
 import os
@@ -174,6 +175,21 @@ def build_players_table(player_ids):
 
 def update_data(date):
     warnings.filterwarnings("ignore")
+    CUSTOM_HEADERS = {
+    "Host":              "stats.nba.com",
+    "User-Agent":        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                         "AppleWebKit/537.36 (KHTML, like Gecko) "
+                         "Chrome/114.0.0.0 Safari/537.36",
+    "Accept":            "application/json, text/plain, */*",
+    "Accept-Language":   "en-US,en;q=0.9",
+    "Referer":           "https://stats.nba.com",
+    "Origin":            "https://stats.nba.com",
+    "Connection":        "keep-alive",
+    "x-nba-stats-token": "true",
+    "x-nba-stats-origin":"stats"}
+
+# merge your custom headers into nba_api’s defaults
+    http.STATS_HEADERS.update(CUSTOM_HEADERS)
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     try:
         df = scoreboardv2.ScoreboardV2(game_date=date)
