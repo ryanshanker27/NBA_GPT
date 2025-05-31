@@ -49,7 +49,7 @@ Toggle between light/dark mode using the switch in the top‑right corner.
 - Add Betting Data: Integrate game lines (spreads, moneylines) and player props to allow users to ask if players/teams performed relative to their lines. 
 - Extended Data Coverage: Integrate advanced metrics (advanced analytics, lineup combinations).
 - User Authentication: Allow personalized query history and saved favorites.
-- Caching Layer: Introduce Redis for hot‑path query caching to reduce latency and API costs.
+- Caching Layer: Introduce Redis for query caching to reduce latency and API costs.
 
 ## Suggestions
 If anyone has any suggestions on how this site/engine can be improved, feel free to reach out at ryanjshanker@gmail.com.
