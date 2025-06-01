@@ -81,11 +81,9 @@ def fetch_game_stats_tables(game_id):
         bs_traditional = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id).get_data_frames()
         df_traditional_player = bs_traditional[0][['GAME_ID', 'TEAM_ID', 'PLAYER_ID', 'PLAYER_NAME', 'MIN', 'FGM', 'FGA', 'FG3M', 'FG3A',
                 'FTM', 'FTA', 'OREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PTS', 'PLUS_MINUS']]
-        print('Before')
         df_traditional_player['MIN'] = df_traditional_player['MIN'].apply(lambda x: int(float(x.split(':')[0])) if x and ':' in x
                                                                           else int(x.split('.')[0]) if x and '.' in x
                                                                           else int(x) if x else 0)
-        print('Past Minutes')
         df_traditional_team = bs_traditional[1][['GAME_ID', 'TEAM_ID', 'FGM', 'FGA', 'FG3M', 'FG3A',
                 'FTM', 'FTA', 'OREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PTS', 'PLUS_MINUS']]
         

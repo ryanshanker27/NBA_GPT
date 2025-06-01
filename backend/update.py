@@ -4,6 +4,8 @@ import os
 import datetime
 import argparse
 from helpers import update_data  
+import logging
+logging.basicConfig(level=logging.INFO)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -24,9 +26,12 @@ def main():
         raise RuntimeError("SUPABASE_URL and SUPABASE_KEY must be set in env")
 
     # Update
-    print(f"[{datetime.datetime.now().isoformat()}] Starting update for {args.date}")
+    logging.info(f"[{datetime.datetime.now().isoformat()}] Starting update for {args.date}")
     response = update_data(args.date)
-    print(f"[{datetime.datetime.now().isoformat()}] Update complete: {response}")
+    logging.info(f"[{datetime.datetime.now().isoformat()}] Update complete: {response}")
 
 if __name__ == "__main__":
     main()
+
+def lambda_handler(event, context):
+    return main()

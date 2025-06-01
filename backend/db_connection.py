@@ -1,7 +1,5 @@
 import psycopg2
-from psycopg2 import pool
 # from config import Config
-from typing import Dict, List, Tuple, Any, Optional
 import os
 import threading
 
@@ -10,7 +8,7 @@ connection_pool = None
 pool_lock = threading.Lock()
 
 def initialize_connection_pool(min_conn=2, max_conn=10):
-###   Initialize the connection pool if it doesn't exist
+###   Initialize connection pool if it doesn't exist
     global connection_pool
     
     with pool_lock:
@@ -40,7 +38,7 @@ def release_connection(conn):
         connection_pool.putconn(conn)
 
 def get_data_text(query, conn=None):
-###   Execute a query and return the results, with automatic connection management
+###   Execute query and return the results, with automatic connection management
     connection_provided = conn is not None
     
     try:

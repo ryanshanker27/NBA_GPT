@@ -4,6 +4,9 @@ frontend/node_modules/
 backend/config.py
 backend/notebook.ipynb
 backend/examples.py
+backend/Dockerfile
+backend/docker_reqs.txt
+backend/trust.json
 data/
 .venv/
 llm.ipynb

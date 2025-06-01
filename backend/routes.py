@@ -5,7 +5,6 @@ from openai_response import break_down_query, get_response, get_sql_query, get_e
 import uuid
 from user_session import UserSession
 from fuzzy_cache import FuzzyCache
-import re
 import time as tm
 import threading
 

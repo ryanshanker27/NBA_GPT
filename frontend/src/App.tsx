@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Chatbot from "./components/Chatbot";
-import { Button } from "./components/ui/button";
 import { Toggle } from "./components/ui/toggle";
 import { InfoCard, InfoButton } from "./components/ui/infocard";
 
