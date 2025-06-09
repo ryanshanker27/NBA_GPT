@@ -1,4 +1,4 @@
-# [Hoop-GPT](https://nba-1uiai3qdz-ryan-shankers-projects.vercel.app/)
+# [Hoop-GPT](https://nba-gpt-nine.vercel.app/)
 A conversational AI chatbot that utilizes the OpenAI API to deliver real-time NBA player and team performance insights by dynamically generating SQL queries against a self‑built PostgreSQL database.
 
 ## Key Features
