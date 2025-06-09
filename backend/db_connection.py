@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2 import pool
 # from config import Config
 import os
 import threading
@@ -13,7 +14,7 @@ def initialize_connection_pool(min_conn=2, max_conn=10):
     
     with pool_lock:
         if connection_pool is None:
-            connection_pool = psycopg2.pool.ThreadedConnectionPool(
+            connection_pool = pool.ThreadedConnectionPool(
                 minconn=min_conn,
                 maxconn=max_conn,
                 host=os.getenv('DATABASE_HOST'),
