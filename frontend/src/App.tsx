@@ -79,8 +79,17 @@ export default function App() {
         style={{ fontFamily: "Figtree" }}
         className="w-full py-4 text-center text-sm text-gray-500 dark:text-gray-400"
       >
-        © {new Date().getFullYear()} Hoop-GPT - All NBA logos and data are
-        property of the NBA and its teams
+        © {new Date().getFullYear()} Hoop-GPT - All NBA data is property of the
+        NBA and its teams. All code for this project can be found{" "}
+        <a
+          href="https://github.com/ryanshanker27/NBA_GPT"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          here
+        </a>
+        .
       </footer>
 
       <InfoCard
