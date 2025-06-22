@@ -102,10 +102,11 @@ game_stats_team (contains info on all team statistics from a given game):
 PLAYER_AVERAGE_EXAMPLES = """
 Example User Query: What did each Celtics player average over the last 20 games?
 Example Output: SELECT p.player_name AS "Player Name", 
+       COUNT(*) AS "Games Played",
        AVG(gsp.pts) AS "PPG", 
        AVG(gsp.reb) AS "RPG", 
        AVG(gsp.ast) AS "APG", 
-       AVG(gsp.min) AS "MIN", 
+       AVG(gsp.min) AS "MPG", 
        AVG(gsp.stl) AS "SPG", 
        AVG(gsp.blk) AS "BPG"
 FROM game_stats_player gsp
@@ -126,9 +127,9 @@ Example Output: SELECT p.player_name AS "Player Name",
        AVG(gsp.ast) AS "APG",
        AVG(gsp.stl) AS "SPG",
        AVG(gsp.blk) AS "BPG",
-       SUM(NULLIF(gsp.fgm, 0.0))/SUM(NULLIF(gsp.fga, 0.0)) * 100.0 AS "FG%",
-       SUM(NULLIF(gsp.fg3m, 0.0))/SUM(NULLIF(gsp.fg3a, 0.0)) * 100.0 AS "FG3%",
-       SUM(NULLIF(gsp.ftm, 0.0))/SUM(NULLIF(gsp.fta, 0.0)) * 100.0 AS "FT%"
+       (SUM(gsp.fgm)::FLOAT/NULLIF(SUM(gsp.fga), 0) * 100.0) AS "FG%",
+       (SUM(gsp.fg3m)::FLOAT/NULLIF(SUM(gsp.fg3a), 0) * 100.0) AS "3P%",
+       (SUM(gsp.ftm)::FLOAT/NULLIF(SUM(gsp.fta), 0) * 100.0) AS "FT%"
 FROM game_stats_player gsp
 JOIN games g ON gsp.game_id = g.game_id
 JOIN players p ON gsp.player_id = p.player_id
@@ -137,9 +138,10 @@ GROUP BY p.player_name, g.season_id
 ORDER BY p.player_name;
 
 Example User Query: How many points does Jaylen Brown average against each NBA team in the playoffs?
-Example Output: SELECT CASE WHEN t1.team_id = home.team_id THEN away.full_name ELSE home.full_name END AS "Opponent",
+Example Output: SELECT CASE WHEN t1.team_id = home.team_id THEN away.full_name ELSE home.full_name END AS Opponent,
+       COUNT(*) AS "Games Played",
        AVG(gsp.pts) AS "PPG",
-       SUM(gsp.pts) AS "Total Points Scored",
+       SUM(gsp.pts) AS "Total Points",
        COUNT(gsp.game_id) AS "Games Played",
        AVG(gsp.reb) AS "RPG",
        AVG(gsp.ast) AS "APG"
@@ -149,16 +151,17 @@ JOIN teams t1 ON gsp.team_id = t1.team_id
 JOIN teams home ON g.home_team = home.team_id
 JOIN teams away ON g.away_team = away.team_id
 WHERE g.season_type = 'Playoffs' AND gsp.entered_game = 1 AND gsp.player_id = (SELECT player_id FROM players WHERE player_name = 'Jaylen Brown') 
-GROUP BY "Opponent"
+GROUP BY Opponent
 ORDER BY "PPG" DESC;
 
 Example User Query: NBA player leaders in true shooting percentage for a season? Must be a non-center and have averaged over 20 points per game.
 Example Output: SELECT p.player_name AS "Player Name", 
        p.position AS "Position",
-       (g.season_id - 20000) AS "Season Year",
-       SUM(gsp.pts) / NULLIF(2 * (SUM(gsp.fga) + 0.44 * SUM(gsp.fta)) , 0.0) * 100.0 AS "True Shooting %",
-       SUM(gsp.pts) AS "Total Points Scored", 
-       SUM(gsp.fga) AS "Total Field Goals Attempted",
+       (g.season_id - 20000) AS "Season",
+       COUNT(*) AS "Games Played",
+       (SUM(gsp.pts)::FLOAT / NULLIF(2 * (SUM(gsp.fga) + 0.44 * SUM(gsp.fta)), 0) * 100.0) AS "True Shooting %",
+       SUM(gsp.pts) AS "Total Points", 
+       SUM(gsp.fga) AS "Total FGA",
        AVG(gsp.pts) AS "PPG",
        AVG(gsp.reb) AS "RPG",
        AVG(gsp.ast) AS "APG"
@@ -172,34 +175,35 @@ ORDER BY "True Shooting %" DESC
 LIMIT 10;
 
 Example User Query: What team had the most players that shot over 38% from three this season on at least 100 attempts? Provide all teams along with their players that met the criteria.
-Example Output: WITH players_38 AS (SELECT t.full_name AS team, 
-       p.player_name AS player,
-       SUM(NULLIF(gsp.fg3m, 0.0))/SUM(NULLIF(gsp.fg3a, 0.0)) * 100.0 AS fg3_pct,
-       SUM(NULLIF(gsp.fg3m, 0.0)) AS fg3m,
-       SUM(NULLIF(gsp.fg3a, 0.0)) AS fg3a
+Example Output: WITH players_38 AS (SELECT t.full_name AS team_name, 
+       p.player_name AS player_name,
+       (SUM(gsp.fg3m)::FLOAT/NULLIF(SUM(gsp.fg3a), 0) * 100.0) AS fg3_pct,
+       SUM(gsp.fg3m) AS fg3m,
+       SUM(gsp.fg3a) AS fg3a
 FROM game_stats_player gsp
 JOIN games g ON g.game_id = gsp.game_id
 JOIN teams t ON gsp.team_id = t.team_id
 JOIN players p ON gsp.player_id = p.player_id
 WHERE g.season_id = 22024
-GROUP BY (p.player_name, t.full_name)
-HAVING SUM(NULLIF(gsp.fg3m, 0.0))/SUM(NULLIF(gsp.fg3a, 0.0)) * 100.0 > 38
+GROUP BY p.player_name, t.full_name
+HAVING (SUM(gsp.fg3m)::FLOAT/NULLIF(SUM(gsp.fg3a), 0) * 100.0) > 38
 ORDER BY fg3_pct DESC)
 SELECT
-  team AS "Team",
-  COUNT(*) AS "Number of Players",
+  team_name AS "Team Name",
+  COUNT(*) AS "Player Count",
   STRING_AGG(
-    player,
+    player_name,
     ', ' ORDER BY fg3_pct DESC
-  ) AS "List of Players"
+  ) AS "Player List"
 FROM players_38
 WHERE fg3a > 100
-GROUP BY team
-ORDER BY "Number of Players" DESC;
+GROUP BY team_name
+ORDER BY "Player Count" DESC;
 
 Example User Query: Compare the stats of Jayson Tatum in his wins and losses this season.
 Example Output: SELECT 
     CASE WHEN (g.home_team = t.team_id AND g.home_score > g.away_score) OR (g.away_team = t.team_id AND g.away_score > g.home_score) THEN 'Win' ELSE 'Loss' END AS "Win/Loss",
+    COUNT(*) AS "Games Played",
     AVG(gsp.pts) AS "PPG",
     AVG(gsp.reb) AS "RPG",
     AVG(gsp.ast) AS "APG"
@@ -225,10 +229,10 @@ LIMIT 10;
 
 Example User Query: How many threes did the Nuggets make in their 2023 and 2024 playoff games?
 Example Output: SELECT g.game_date AS "Game Date", 
-       g.season_id - 20000 AS "Season",
+       (g.season_id - 20000) AS "Season",
        t1.full_name AS "Home Team", 
        t2.full_name AS "Away Team", 
-       SUM(gst.fg3m) AS "Threes Made"
+       SUM(gst.fg3m) AS "3PM"
 FROM game_stats_team gst
 JOIN games g ON gst.game_id = g.game_id
 JOIN teams t1 ON g.home_team = t1.team_id
@@ -244,11 +248,11 @@ Example Output: SELECT
   CASE
     WHEN g.home_score > g.away_score THEN home.full_name
     ELSE away.full_name
-  END AS "Team",
+  END AS "Team Name",
   CASE
     WHEN g.home_score < g.away_score THEN home.full_name
     ELSE away.full_name
-  END AS "Opponent",
+  END AS Opponent,
   g.game_date AS "Game Date",
   ABS(g.home_score - g.away_score) AS "Margin of Victory"
 FROM games g
@@ -266,23 +270,24 @@ FROM games g
 JOIN teams t1 ON g.home_team = t1.team_id
 JOIN teams t2 ON g.away_team = t2.team_id
 WHERE ((t1.full_name = 'Boston Celtics' AND t2.full_name = 'New York Knicks') 
-   OR (t1.full_name = 'Cleveland Cavaliers' AND t2.full_name = 'Boston Celtics'))
+   OR (t1.full_name = 'New York Knicks' AND t2.full_name = 'Boston Celtics'))
    AND g.season_id = 22024
 ORDER BY g.game_date DESC;
 
 Example User Query: What is each NBA team's record and win percentage when they hold their opponent to less than 40% field goal percentage?
 Example Output: SELECT
-  t.full_name AS "Team",
+  t.full_name AS "Team Name",
+  COUNT(*) AS "Games Played",
   SUM(CASE WHEN ts.plus_minus > 0 THEN 1 ELSE 0 END) AS "Wins",
   SUM(CASE WHEN ts.plus_minus < 0 THEN 1 ELSE 0 END) AS "Losses",
-  SUM(CASE WHEN ts.plus_minus > 0.0 THEN 1.0 ELSE 0.0 END)/COUNT(*) AS "Win Percentage"
+  (SUM(CASE WHEN ts.plus_minus > 0.0 THEN 1.0 ELSE 0.0 END)::FLOAT/COUNT(*) * 100.0) AS "Win Percentage"
 FROM game_stats_team ts
 JOIN game_stats_team os
   ON ts.game_id = os.game_id
   AND ts.team_id <> os.team_id
 JOIN teams t
   ON ts.team_id = t.team_id
-WHERE os.fgm / NULLIF(os.fga,0.0) < 0.40
+WHERE (os.fgm::FLOAT / NULLIF(os.fga,0)) < 0.40
 GROUP BY t.full_name
 ORDER BY "Win Percentage" DESC;
 """
@@ -295,7 +300,7 @@ JOIN games g ON gsp.game_id = g.game_id
 JOIN teams t1 ON g.home_team = t1.team_id 
 JOIN teams t2 ON g.away_team = t2.team_id 
 JOIN players p ON gsp.player_id = p.player_id 
-WHERE gsp.pts >= 50 AND (t1.full_name = 'Los Angeles Lakers' OR t2.full_name = 'Los Angeles Lakers') 
+WHERE gsp.pts >= 30 AND (t1.full_name = 'Los Angeles Lakers' OR t2.full_name = 'Los Angeles Lakers') 
 AND g.game_date >= '2025-01-01' AND g.game_date < '2026-01-01' 
 AND gsp.team_id != (SELECT team_id FROM teams WHERE full_name = 'Los Angeles Lakers')
 ORDER BY g.game_date DESC;
@@ -322,39 +327,39 @@ LIMIT 10;
 
 Example User Query: What player has the most games of over 20 shots and less than 40% field goal percentage?
 Example Output: SELECT p.player_name AS "Player Name", 
-       COUNT(gsp.game_id) AS "Games Count"
+       COUNT(gsp.game_id) AS "Game Count"
 FROM game_stats_player gsp
 JOIN games g ON gsp.game_id = g.game_id
 JOIN players p ON gsp.player_id = p.player_id
-WHERE gsp.fga > 20 AND (gsp.fgm::FLOAT / NULLIF(gsp.fga, 0.0)) < 0.40
+WHERE gsp.fga > 20 AND (gsp.fgm::FLOAT / NULLIF(gsp.fga, 0)) < 0.40
 GROUP BY p.player_name
-ORDER BY "Games Count" DESC
+ORDER BY "Game Count" DESC
 LIMIT 10;
 
 Example User Query: What team had the most players to score at least 30 points in a game this season? Rank each team and list the players that scored at least 30 points.
 Example Output: SELECT t.full_name AS "Team Name", 
-       COUNT(DISTINCT gsp.player_id) AS "Players Scoring At Least 30 Points",
+       COUNT(DISTINCT gsp.player_id) AS "Player Count",
        STRING_AGG(
     DISTINCT p.player_name,
-    ', ') AS "List of Players"
+    ', ') AS "Player List"
 FROM game_stats_player gsp
 JOIN games g ON gsp.game_id = g.game_id
 JOIN players p ON gsp.player_id = p.player_id
 JOIN teams t ON gsp.team_id = t.team_id
 WHERE g.season_id = 22024 AND gsp.pts >= 30
 GROUP BY t.full_name
-ORDER BY "Players Scoring At Least 30 Points" DESC
+ORDER BY "Player Count" DESC
 LIMIT 10;
 
 Example User Query: Sort Kentucky, Duke, North Carolina, Kansas, and Villanova by the highest number of points a player who attended that school scored this season.
 Example Output: WITH ranked AS (
   SELECT
     p.player_name      AS "Player Name",
-    (g.season_id - 20000) AS "Season Year",
+    (g.season_id - 20000) AS "Season",
     g.game_date        AS "Game Date",
     home.full_name     AS "Home Team",
     away.full_name     AS "Away Team",
-    gsp.pts            AS "Points Scored",
+    gsp.pts            AS "PTS",
     p.school           AS "School",
     ROW_NUMBER() OVER (
       PARTITION BY p.school
@@ -370,17 +375,17 @@ Example Output: WITH ranked AS (
     )
     AND g.season_id = 22024
 )
-SELECT "Player Name", "Season Year", "Game Date", "Home Team", "Away Team", "Points Scored", "School"
+SELECT "Player Name", "Season", "Game Date", "Home Team", "Away Team", "PTS", "School"
 FROM ranked
 WHERE rn = 1
-ORDER BY "Points Scored" DESC;
+ORDER BY "PTS" DESC;
 
 Example User Query: What is the most number of points, rebounds, and assists that Jaylen Brown has had against each NBA team?
 Example Output: SELECT
-  opp.full_name               AS "Opponent",
-  MAX(gsp.pts)                AS "Max Points",
-  MAX(gsp.reb)                AS "Max Rebounds",
-  MAX(gsp.ast)                AS "Max Assists"
+  opp.full_name               AS Opponent,
+  MAX(gsp.pts)                AS "Max PTS",
+  MAX(gsp.reb)                AS "Max REB",
+  MAX(gsp.ast)                AS "Max AST"
 FROM game_stats_player gsp
 JOIN players p
   ON gsp.player_id = p.player_id
@@ -399,10 +404,10 @@ ORDER BY opp.full_name;
 PLAYER_INFORMATION_EXAMPLES = """
 Example User Query: Who is the highest draft pick to ever play for the Minnesota Timberwolves?
 Example Output: SELECT
-  p.player_name AS "Player",
+  p.player_name AS "Player Name",
   p.draft_year AS "Draft Year",
-  CAST(p.draft_round AS INT)  AS "Round",
-  CAST(p.draft_number AS INT) AS "Pick In Round"
+  CAST(p.draft_round AS INT)  AS "Draft Round",
+  CAST(p.draft_number AS INT) AS "Draft Pick"
 FROM players p
 JOIN game_stats_player gsp 
   ON p.player_id = gsp.player_id
@@ -421,7 +426,7 @@ ORDER BY
 LIMIT 10;
 
 Example User Query: What is the average height of the current San Antonio Spurs?
-Example Output: SELECT AVG(p.height) AS "Average Height (inches)"
+Example Output: SELECT AVG(p.height::FLOAT) AS "Average Height"
 FROM players p
 WHERE p.player_id IN (
   SELECT DISTINCT gsp.player_id
@@ -461,14 +466,14 @@ qualified_players AS (
     player_name,
     school
   FROM season_avg
-  WHERE avg_ppg >= 20
+  WHERE avg_ppg >= 10
 )
 SELECT
-  school            AS "College",
-  COUNT(*)          AS "Num Players ≥10 PPG",
+  school AS "School",
+  COUNT(*) AS "Player Count",
   STRING_AGG(
     DISTINCT player_name,
-    ', ') AS "List of Players"
+    ', ') AS "Player List"
 FROM qualified_players
 GROUP BY school
 ORDER BY COUNT(*) DESC
@@ -476,55 +481,58 @@ LIMIT 10;
 
 Example User Query: What country had the most NBA players to play a game in the 2024-25 season?
 Example Output: SELECT p.country AS "Country", 
-       COUNT(DISTINCT p.player_id) AS "Number of Players"
+       COUNT(DISTINCT p.player_id) AS "Player Count"
 FROM players p
 JOIN game_stats_player gsp ON p.player_id = gsp.player_id
 JOIN games g ON gsp.game_id = g.game_id
 WHERE g.season_id = 22024 AND gsp.entered_game = 1
 GROUP BY p.country
-ORDER BY "Number of Players" DESC
+ORDER BY "Player Count" DESC
 LIMIT 10;
 """
 
 TEAM_AVERAGES_EXAMPLES = """
 Example User Query: What is the average number of points scored and opponent points scored per game for each team in the 2024-25 playoffs?
 Example Output: SELECT
-  t.full_name AS "Team",
-  AVG(gst.pts) AS "Avg Points Scored",
+  t.full_name AS "Team Name",
+  COUNT(*) AS "Games Played",
+  AVG(gst.pts) AS "PPG",
   AVG(
     CASE
       WHEN g.home_team = gst.team_id THEN g.away_score
       ELSE g.home_score
     END
-  ) AS "Avg Opponent Points"
+  ) AS "Opponent PPG"
 FROM game_stats_team gst
 JOIN games g ON gst.game_id = g.game_id
 JOIN teams t ON gst.team_id = t.team_id
 WHERE g.season_id   = 22024
   AND g.season_type = 'Playoffs'
 GROUP BY t.full_name
-ORDER BY "Avg Points Scored" DESC;
+ORDER BY "PPG" DESC;
 
 Example User Query: What are the three point shooting statistics per game of every team in the 2023 season?
-Example Output: SELECT t.full_name AS "Team", 
-       AVG(gst.fg3m) AS "Three Pointers Made", 
-       AVG(gst.fg3a) AS "Three Pointers Attempted", 
-       (SUM(gst.fg3m) * 100.0 / NULLIF(SUM(gst.fg3a), 0)) AS "FG3%"
+Example Output: SELECT t.full_name AS "Team Name", 
+       COUNT(*) AS "Games Played",
+       AVG(gst.fg3m) AS "3PM", 
+       AVG(gst.fg3a) AS "3PA", 
+       (SUM(gst.fg3m)::FLOAT / NULLIF(SUM(gst.fg3a), 0) * 100.0) AS "3P%"
 FROM game_stats_team gst
 JOIN games g ON gst.game_id = g.game_id
 JOIN teams t ON gst.team_id = t.team_id
 WHERE g.season_id = 22023
 GROUP BY t.full_name
-ORDER BY "FG3%" DESC;
+ORDER BY "3P%" DESC;
 
 Example User Query: Compare every NBA team's points scored per game in wins vs points scored per game in losses in the 2024-25 season.
-Example Output: SELECT t.full_name AS "Team", 
+Example Output: SELECT t.full_name AS "Team Name", 
+       COUNT(*) AS "Games Played",
        AVG(CASE WHEN g.home_team = gst.team_id AND g.home_score > g.away_score THEN gst.pts 
                 WHEN g.away_team = gst.team_id AND g.home_score <= g.away_score THEN gst.pts
-                END) AS "Points Scored Per Game in Wins", 
+                END) AS "PPG in Wins", 
        AVG(CASE WHEN g.away_team = gst.team_id AND g.home_score > g.away_score THEN gst.pts
                 WHEN g.home_team = gst.team_id AND g.home_score < g.away_score THEN gst.pts 
-                END) AS "Points Scored Per Game in Losses"
+                END) AS "PPG in Losses"
 FROM game_stats_team gst
 JOIN games g ON gst.game_id = g.game_id
 JOIN teams t ON gst.team_id = t.team_id
@@ -533,9 +541,10 @@ GROUP BY t.full_name
 ORDER BY t.full_name;
 
 Example User Query: What is the net rating of the Boston Celtics against all other NBA teams?
-Example Output: SELECT CASE WHEN t1.team_id = home.team_id THEN away.full_name ELSE home.full_name END AS "Opponent",
-       AVG(gst.off_rating) AS "Offensive Rating",
-       AVG(gst.def_rating) AS "Defensive Rating",
+Example Output: SELECT CASE WHEN t1.team_id = home.team_id THEN away.full_name ELSE home.full_name END AS Opponent,
+       COUNT(*) AS "Games Played",
+       AVG(gst.off_rating) AS off_rating,
+       AVG(gst.def_rating) AS def_rating,
        AVG(gst.off_rating) - AVG(gst.def_rating) AS "Net Rating"
 FROM game_stats_team gst
 JOIN games g ON gst.game_id = g.game_id
@@ -543,7 +552,7 @@ JOIN teams t1 ON gst.team_id = t1.team_id
 JOIN teams home ON g.home_team = home.team_id
 JOIN teams away ON g.away_team = away.team_id
 WHERE gst.team_id = (SELECT team_id FROM teams WHERE full_name = 'Boston Celtics') 
-GROUP BY "Opponent"
+GROUP BY Opponent
 ORDER BY "Net Rating" DESC;
 """
 
@@ -581,7 +590,7 @@ Generate a PostgreSQL statement that:
 Join tables: games, game_stats_*, teams, players; apply breakdown filters.
 
 Required fields:
-- Game rows: game_date, home_team.full_name AS "HOME_TEAM", away_team.full_name AS "AWAY_TEAM", home_score AS "HOME_SCORE", away_score AS "AWAY_SCORE".
+- Game rows: game_date AS "Game Date", home_team.full_name AS "Home Team", away_team.full_name AS "Away Team", home_score AS "Home Score", away_score AS "Away Score".
 - Player performance: MIN AS "MIN", PTS AS "PTS", REB AS "REB", AST AS "AST", STL AS "STL", BLK AS "BLK".
 - Player averages: PPG AS "PPG", RPG AS "RPG", APG AS "APG".
 - Include any extra fields used for filtering or calculations.
@@ -591,8 +600,10 @@ Global rules:
 2. Cast divisions/percentages/averages to FLOAT; multiply percentages by 100.
 3. Season = season_id - 20000 (e.g. 22024 → 2024-25); assume calendar year if only year given.
 4. AGE calculated at game_date.
-5. LIMIT ≤ 30 rows (≤ 10 if superlative: most/best/highest/least/lowest/leading).
-6. Alias non-name/date/rating columns as UPPER-CASE abbreviations in quotes (e.g. "PTS", "FG3%", "USG%"); leave names/dates/ratings unaliased.
+5. LIMIT ≤ 50 rows (≤ 10 if query includes a superlative such as most, best, highest, least, lowest, leading etc.).
+6. Alias non-name/date/rating columns as UPPER-CASE abbreviations in quotes (e.g. "PTS", "FG3%", "USG%"); leave names/dates/ratings unaliased, but proprely capitalized and spaced.
+7. For all multi-game average queries, include the number of games played.
+8. Utilize string aggregation for queries in which players/games are being listed for each team.
 
 Opponent-specific filtering:
 - For Team A vs Team B:  
@@ -723,13 +734,13 @@ def get_sql_query(query, querybreakdown):
 
     sqlquery = response.choices[0].message.content.strip()
     if sqlquery.lstrip().startswith("```sql"):
-        # Remove the ```sql marker
+        # Remove the ```sql marker if present
         sqlquery = re.sub(r"^```sql\s*\n?", "", sqlquery, flags=re.IGNORECASE)
         # Remove a trailing ``` if present
         sqlquery = re.sub(r"\n?```$", "", sqlquery)
     print("SQL Query:", sqlquery)
     # Check for unsupported responses
-    if "I cannot answer" in sqlquery or "cannot be answered" in sqlquery or not sqlquery.strip().lower().startswith("select"):
+    if "I cannot answer" in sqlquery or "cannot be answered" in sqlquery:
         return None
     return sqlquery
 

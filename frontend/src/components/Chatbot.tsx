@@ -51,7 +51,7 @@ export default function Chatbot() {
       setDisplayedContent(fullText.substring(0, currentIndex));
       setTimeout(() => {
         animateTyping(fullText, currentIndex + 1, messageIndex);
-      }, 40); // Adjust speed as needed
+      }, 8); // Adjust speed as needed
     } else {
       setAnimatingMessageIndex(null);
     }
