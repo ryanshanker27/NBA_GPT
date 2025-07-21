@@ -36,7 +36,7 @@ A conversational AI chatbot that utilizes the OpenAI API to deliver real-time NB
 |                  | GitHub Actions          | Automated database updates                                 |
 
 ## Usage
-Navigate to the live demo: (https://nba-1uiai3qdz-ryan-shankers-projects.vercel.app/) 
+Navigate to the live demo: (https://nba-gpt-nine.vercel.app/)
 
 Type natural‑language questions such as:
 - “What was LeBron James’s PPG in the 2024 playoffs?”
